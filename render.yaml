@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: geogrind
+    runtime: static
+    buildFilter:
+      paths:
+        - client/**/*
+    buildCommand: cd client && bun i && bun run build
+    staticPublishPath: ./client/dist
