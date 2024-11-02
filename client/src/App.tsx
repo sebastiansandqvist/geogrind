@@ -202,8 +202,8 @@ const App: Component = () => {
   });
 
   return (
-    <div class="grid gap-6 p-8">
-      <div class="flex flex-wrap gap-x-2">
+    <div class="mx-auto grid max-w-4xl gap-6 p-8">
+      <div class="flex flex-wrap gap-x-4">
         <label class="select-none">
           <input
             type="radio"
@@ -229,7 +229,7 @@ const App: Component = () => {
           )}
         </For>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-4">
         <label class="select-none">
           <input type="checkbox" checked={geoguessrOnly()} onChange={(e) => setGeoguessrOnly(e.target.checked)} />
           Geoguessr
