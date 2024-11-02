@@ -2,6 +2,7 @@ import { Accessor, Component, createEffect, createSignal, For, Match, Switch } f
 import { Continent, continents, countries } from './data/countries';
 import { sampleSize, shuffle } from './util';
 import { autofocus } from '@solid-primitives/autofocus';
+import { flashMessage, FlashMessageContainer } from './components/flashMessage';
 
 const WrongAnswerList: Component<{ answers: Accessor<string[]>; clear: () => void }> = (props) => {
   return (
@@ -163,7 +164,7 @@ function pickNextQuestion({
       };
 }
 
-const App: Component = () => {
+const Quiz: Component = () => {
   const [geoguessrOnly, setGeoguessrOnly] = createSignal(true);
   const [flagIsPrompt, setFlagIsPrompt] = createSignal(true);
   const [region, setRegion] = createSignal<Region>('world');
@@ -243,16 +244,24 @@ const App: Component = () => {
         question={currentQuestion()}
         submitAnswer={(answer, question, isFitb) => {
           const isCorrect = isFitb ? isFitbCorrect(answer, question) : question.answer === answer;
+          const entry = countries.find((x) => x.country === question.answer || x.country === question.prompt);
 
           if (isCorrect) {
             setCorrectAnswers((prev) => [...prev.filter((x) => x !== answer), answer]);
             setIncorrectAnswers((prev) => [...prev.filter((x) => x !== question.prompt)]);
             setCurrentQuestion(next());
           } else {
-            alert(`${question.prompt} ${question.answer}`);
             setCorrectAnswers((prev) => [...prev.filter((x) => x !== answer)]);
             setIncorrectAnswers((prev) => [...prev, question.prompt]);
             setCurrentQuestion(next());
+          }
+
+          if (entry) {
+            const { country, flag, drivesOnThe, dialingPrefix } = entry;
+            flashMessage(
+              `${flag}\n${country} (${dialingPrefix.trim()})\ndrives ${drivesOnThe}`,
+              isCorrect ? 'green' : 'red',
+            );
           }
         }}
       />
@@ -261,4 +270,11 @@ const App: Component = () => {
   );
 };
 
-export default App;
+export function App() {
+  return (
+    <>
+      <Quiz />
+      <FlashMessageContainer />
+    </>
+  );
+}
