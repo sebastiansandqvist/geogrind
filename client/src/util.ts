@@ -15,3 +15,8 @@ export function sampleSize<T>(array: readonly T[] | T[], n: number): [T, ...T[]]
   const result = shuffle(array).slice(0, Math.min(n, array.length));
   return result as [T, ...T[]];
 }
+
+// remove diacritics
+export function deburr(input: string): string {
+  return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}

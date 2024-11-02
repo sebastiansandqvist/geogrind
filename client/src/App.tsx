@@ -1,6 +1,6 @@
 import { Accessor, Component, createEffect, createSignal, For, Match, Switch } from 'solid-js';
-import { Continent, continents, countries } from './data/countries';
-import { sampleSize, shuffle } from './util';
+import { Continent, continents, countries, Country } from './data/countries';
+import { deburr, sampleSize, shuffle } from './util';
 import { autofocus } from '@solid-primitives/autofocus';
 import { flashMessage, FlashMessageContainer } from './components/flashMessage';
 
@@ -19,8 +19,8 @@ const WrongAnswerList: Component<{ answers: Accessor<string[]>; clear: () => voi
 };
 
 function isFitbCorrect(answer: string, question: Question) {
-  const actual = question.answer.toLowerCase();
-  const received = answer.trim().toLowerCase();
+  const actual = deburr(question.answer.toLowerCase());
+  const received = deburr(answer.trim().toLowerCase());
   return received.length > 2 && actual.includes(received);
 }
 
@@ -170,6 +170,7 @@ const Quiz: Component = () => {
   const [region, setRegion] = createSignal<Region>('world');
   const [correctAnswers, setCorrectAnswers] = createSignal<string[]>([]);
   const [incorrectAnswers, setIncorrectAnswers] = createSignal<string[]>([]);
+  const [logs, setLogs] = createSignal<{ country: Country; correct: boolean }[]>([]);
 
   const next = () =>
     pickNextQuestion({
@@ -243,10 +244,10 @@ const Quiz: Component = () => {
       <DisplayQuestion
         question={currentQuestion()}
         submitAnswer={(answer, question, isFitb) => {
-          const isCorrect = isFitb ? isFitbCorrect(answer, question) : question.answer === answer;
+          const correct = isFitb ? isFitbCorrect(answer, question) : question.answer === answer;
           const entry = countries.find((x) => x.country === question.answer || x.country === question.prompt);
 
-          if (isCorrect) {
+          if (correct) {
             setCorrectAnswers((prev) => [...prev.filter((x) => x !== answer), answer]);
             setIncorrectAnswers((prev) => [...prev.filter((x) => x !== question.prompt)]);
             setCurrentQuestion(next());
@@ -258,19 +259,44 @@ const Quiz: Component = () => {
 
           if (entry) {
             const { country, flag, drivesOnThe, dialingPrefix } = entry;
-            flashMessage(
-              `${flag}\n${country} (${dialingPrefix.trim()})\ndrives ${drivesOnThe}`,
-              isCorrect ? 'green' : 'red',
-            );
+            const message = `${flag}\n${country} (${dialingPrefix.trim()})\ndrives ${drivesOnThe}`;
+            flashMessage(message, correct ? 'green' : 'red');
+            setLogs((prev) => [{ country: entry, correct }, ...prev]);
           }
         }}
       />
       <WrongAnswerList answers={incorrectAnswers} clear={() => setIncorrectAnswers([])} />
+      <Logs logs={logs()} />
     </div>
   );
 };
 
-// TODO: answer log in scrollable textarea
+const Logs: Component<{ logs: { country: Country; correct: boolean }[] }> = (props) => {
+  return (
+    <output class="flex h-72 w-full flex-col gap-2 overflow-scroll border border-neutral-500 p-2">
+      <For each={props.logs}>
+        {({ correct, country: { country, dialingPrefix, drivesOnThe, flag } }) => (
+          <div
+            class="flex items-center justify-between gap-2 border px-2"
+            classList={{
+              'border-emerald-500': correct,
+              'border-rose-500': !correct,
+            }}
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-3xl">{flag}</span>
+              <strong class="font-medium">{country}</strong>
+              <span class="opacity-50">{dialingPrefix}</span>
+            </div>
+            <span>
+              🚗 <span class="opacity-75">{drivesOnThe}</span>
+            </span>
+          </div>
+        )}
+      </For>
+    </output>
+  );
+};
 
 export function App() {
   return (
