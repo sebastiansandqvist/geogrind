@@ -1,20 +1,24 @@
-import { Accessor, Component, createEffect, createSignal, For, Match, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import { Continent, continents, countries, Country } from './data/countries';
-import { deburr, sampleSize, shuffle } from './util';
+import { deburr, isEmoji, sampleSize, shuffle } from './util';
 import { autofocus } from '@solid-primitives/autofocus';
 import { flashMessage, FlashMessageContainer } from './components/flashMessage';
 
-const WrongAnswerList: Component<{ answers: Accessor<string[]>; clear: () => void }> = (props) => {
+const WrongAnswerList: Component<{ answers: string[]; clear: () => void }> = (props) => {
   return (
-    <div class="flex gap-1">
-      <span class="opacity-50">wrong: </span>
-      <For each={props.answers()}>
-        {(answer) => {
-          return <span>{answer}</span>;
-        }}
-      </For>
-      <button onClick={props.clear}>×</button>
-    </div>
+    <Show when={props.answers.length > 0}>
+      <div class="flex gap-1">
+        <span class="opacity-50">wrong: </span>
+        <For each={props.answers}>
+          {(answer) => {
+            return <span>{answer}</span>;
+          }}
+        </For>
+        <button class="cursor-pointer opacity-50 transition hover:opacity-100" onClick={props.clear}>
+          ×
+        </button>
+      </div>
+    </Show>
   );
 };
 
@@ -22,11 +26,6 @@ function isFitbCorrect(answer: string, question: Question) {
   const actual = deburr(question.answer.toLowerCase());
   const received = deburr(answer.trim().toLowerCase());
   return received.length > 2 && actual.includes(received);
-}
-
-function isEmoji(s: string): boolean {
-  const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
-  return emojiRegex.test(s);
 }
 
 const DisplayQuestion: Component<{
@@ -51,7 +50,7 @@ const DisplayQuestion: Component<{
               <For each={question.options}>
                 {({ value }) => (
                   <button
-                    class="cursor-pointer bg-white p-1 font-medium text-black"
+                    class="cursor-pointer bg-white p-1.5 font-medium text-black"
                     classList={{
                       'text-6xl': isEmoji(value),
                     }}
@@ -83,7 +82,7 @@ const DisplayQuestion: Component<{
                   }
                 }}
               />
-              <button class="cursor-pointer bg-white p-1 font-medium text-black" type="submit">
+              <button class="cursor-pointer bg-white p-1.5 font-medium text-black" type="submit">
                 Submit
               </button>
             </div>
@@ -265,8 +264,8 @@ const Quiz: Component = () => {
           }
         }}
       />
-      <WrongAnswerList answers={incorrectAnswers} clear={() => setIncorrectAnswers([])} />
       <Logs logs={logs()} />
+      <WrongAnswerList answers={incorrectAnswers()} clear={() => setIncorrectAnswers([])} />
     </div>
   );
 };

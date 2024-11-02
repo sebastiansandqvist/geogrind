@@ -20,3 +20,8 @@ export function sampleSize<T>(array: readonly T[] | T[], n: number): [T, ...T[]]
 export function deburr(input: string): string {
   return input.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
+
+export function isEmoji(s: string): boolean {
+  const emojiRegex = /(\p{Emoji_Presentation}|\p{Emoji}\uFE0F)/gu;
+  return emojiRegex.test(s);
+}
