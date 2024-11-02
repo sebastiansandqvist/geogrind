@@ -139,7 +139,7 @@ function pickNextQuestion({
   }
 
   const nextCountry = queue.shift()!;
-  const isFitb = correctAnswers.includes(nextCountry.country);
+  const isFitb = !flagIsPrompt && correctAnswers.includes(nextCountry.country);
   return isFitb
     ? {
         kind: 'fitb',
