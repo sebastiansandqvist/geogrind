@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@solid-primitives/map": "0.4.13",
+    "@solid-primitives/autofocus": "0.0.111",
     "@solid-primitives/storage": "4.2.1",
     "solid-js": "1.9.3",
     "tailwindcss": "4.0.0-alpha.31"
