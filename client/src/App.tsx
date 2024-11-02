@@ -77,7 +77,7 @@ const DisplayQuestion: Component<{
                 value={fitbAnswer()}
                 onInput={(e) => {
                   setFitbAnswer(e.currentTarget.value);
-                  if (e.currentTarget.value.toLowerCase() === question.answer.toLowerCase()) {
+                  if (deburr(e.currentTarget.value.toLowerCase()) === deburr(question.answer.toLowerCase())) {
                     handleSubmitFitb();
                   }
                 }}
