@@ -140,7 +140,7 @@ function pickNextQuestion({
   }
 
   const nextCountry = queue.shift()!;
-  const isFitb = !flagIsPrompt && correctAnswers.includes(nextCountry.country);
+  const isFitb = flagIsPrompt && correctAnswers.includes(nextCountry.country);
   return isFitb
     ? {
         kind: 'fitb',
@@ -269,6 +269,8 @@ const Quiz: Component = () => {
     </div>
   );
 };
+
+// TODO: answer log in scrollable textarea
 
 export function App() {
   return (
