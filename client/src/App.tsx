@@ -287,9 +287,23 @@ const Logs: Component<{ logs: { country: Country; correct: boolean }[] }> = (pro
               <strong class="font-medium">{country}</strong>
               <span class="opacity-50">{dialingPrefix}</span>
             </div>
-            <span>
-              🚗 <span class="opacity-75">{drivesOnThe}</span>
-            </span>
+            <div class="flex items-center gap-2">
+              <span>
+                🚗 <span class="opacity-75">{drivesOnThe}</span>
+              </span>
+              <a
+                class="underline transition hover:text-sky-400"
+                href={`https://en.wikipedia.org/wiki/${encodeURIComponent(country)}`}
+              >
+                wiki
+              </a>
+              <a
+                class="underline transition hover:text-sky-400"
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(country)}`}
+              >
+                map
+              </a>
+            </div>
           </div>
         )}
       </For>
