@@ -1,4 +1,16 @@
-export const flags = [
+export const continents = [
+  'Africa',
+  'Asia',
+  'Europe',
+  'North America',
+  'South America',
+  'Oceania',
+  'Antarctica',
+] as const;
+
+export type Continent = (typeof continents)[number];
+
+export const countries = [
   {
     country: 'Andorra',
     code: 'AD',
@@ -2241,3 +2253,5 @@ export const flags = [
     dialingPrefix: '+263',
   },
 ] as const;
+
+export type Country = (typeof countries)[number];
