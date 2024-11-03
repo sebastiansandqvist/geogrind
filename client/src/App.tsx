@@ -4,14 +4,28 @@ import { deburr, isEmoji, sampleSize, shuffle } from './util';
 import { autofocus } from '@solid-primitives/autofocus';
 import { flashMessage, FlashMessageContainer } from './components/flashMessage';
 
-const WrongAnswerList: Component<{ answers: string[]; clear: () => void }> = (props) => {
+const WrongAnswerList: Component<{
+  answers: string[];
+  clear: () => void;
+  onItemClick: (item: string) => void;
+}> = (props) => {
   return (
     <Show when={props.answers.length > 0}>
-      <div class="flex gap-1">
+      <div class="flex flex-wrap items-center gap-1">
         <span class="opacity-50">wrong: </span>
         <For each={props.answers}>
           {(answer) => {
-            return <span>{answer}</span>;
+            return (
+              <button
+                class="cursor-pointer"
+                classList={{
+                  'text-xl': isEmoji(answer),
+                }}
+                onClick={() => props.onItemClick(answer)}
+              >
+                {answer}
+              </button>
+            );
           }}
         </For>
         <button class="cursor-pointer opacity-50 transition hover:opacity-100" onClick={props.clear}>
@@ -45,7 +59,7 @@ const DisplayQuestion: Component<{
       <Match keyed when={props.question.kind === 'mc' && props.question}>
         {(question) => (
           <article class="mx-auto w-64 text-center">
-            <h1 class={isEmoji(question.prompt) ? 'text-[10rem]' : ''}>{question.prompt}</h1>
+            <h1 class={isEmoji(question.prompt) ? 'text-[10rem]' : 'mb-4 text-2xl'}>{question.prompt}</h1>
             <div class="grid gap-1">
               <For each={question.options}>
                 {({ value }) => (
@@ -265,7 +279,28 @@ const Quiz: Component = () => {
         }}
       />
       <Logs logs={logs()} />
-      <WrongAnswerList answers={incorrectAnswers()} clear={() => setIncorrectAnswers([])} />
+      <WrongAnswerList
+        answers={incorrectAnswers()}
+        clear={() => setIncorrectAnswers([])}
+        onItemClick={(item) => {
+          const country = countries.find((x) => x.country === item || x.flag === item);
+          if (!country) return;
+
+          // since we're replacing the current question,
+          // push it back onto the queue for later so it's not skipped
+          const { answer, prompt } = currentQuestion();
+          const currentItemCountry = countries.find((x) => x.country === answer || x.country === prompt);
+          if (currentItemCountry) queue.push(currentItemCountry);
+
+          // surface the question and remove it from the list of mistakes
+          setCurrentQuestion({
+            kind: 'fitb',
+            answer: flagIsPrompt() ? country.country : country.flag,
+            prompt: flagIsPrompt() ? country.flag : country.country,
+          });
+          setIncorrectAnswers((prev) => [...prev.filter((x) => x !== country.flag && x !== country.country)]);
+        }}
+      />
     </div>
   );
 };
@@ -286,11 +321,11 @@ const Logs: Component<{ logs: { country: Country; correct: boolean }[] }> = (pro
               <span class="text-3xl">{flag}</span>
               <strong class="font-medium">{country}</strong>
               <span class="opacity-50">{dialingPrefix}</span>
-            </div>
-            <div class="flex items-center gap-2">
               <span>
                 🚗 <span class="opacity-75">{drivesOnThe}</span>
               </span>
+            </div>
+            <div class="flex items-center gap-2">
               <a
                 class="underline transition hover:text-sky-400"
                 href={`https://en.wikipedia.org/wiki/${encodeURIComponent(country)}`}
